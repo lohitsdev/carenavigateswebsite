@@ -3,9 +3,39 @@ import { useState, useEffect } from 'react';
 
 function App() {
   const [activeAccordion, setActiveAccordion] = useState(null);
+  const [emailStatus, setEmailStatus] = useState(''); // '', 'loading', 'success', 'error'
+  const [emailValue, setEmailValue] = useState('');
 
   const toggleAccordion = (index) => {
     setActiveAccordion(activeAccordion === index ? null : index);
+  };
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    setEmailStatus('loading');
+
+    const formData = new FormData(e.target);
+
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setEmailStatus('success');
+        setEmailValue('');
+        setTimeout(() => setEmailStatus(''), 5000); // Reset after 5 seconds
+      } else {
+        setEmailStatus('error');
+        setTimeout(() => setEmailStatus(''), 5000);
+      }
+    } catch (error) {
+      setEmailStatus('error');
+      setTimeout(() => setEmailStatus(''), 5000);
+    }
   };
 
   // Intersection Observer for scroll animations
@@ -55,16 +85,6 @@ function App() {
                 <li><a href="#blogs">Blogs</a></li>
               </ul>
             </div>
-            <div className="nav-right">
-              <button className="btn btn-download">
-                <span>Download App</span>
-                <div className="btn-icon-circle">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 12L10 8L6 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </button>
-            </div>
           </nav>
 
           {/* Two Column Content */}
@@ -80,12 +100,45 @@ function App() {
               <p className="hero-description">
                 Check symptoms, upload reports, manage prescriptions, get AI-powered guidance, and even talk to real experts — Care keeps you and your family's health organized, understood, and on track.
               </p>
-              <button className="btn-hero-cta">
-                <span>Get Early Access</span>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+              <form className="early-access-form" onSubmit={handleEmailSubmit}>
+                <input type="hidden" name="access_key" value="a85aa81e-bc02-4a0f-90a4-8bca83f181fd" />
+                <input type="hidden" name="subject" value="New Early Access Signup" />
+                <input type="hidden" name="from_name" value="Care Navigation Website" />
+                <div className="form-group">
+                  <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Enter your email address" 
+                    className="email-input"
+                    value={emailValue}
+                    onChange={(e) => setEmailValue(e.target.value)}
+                    required 
+                    disabled={emailStatus === 'loading'}
+                  />
+                  <button type="submit" className="btn-submit" disabled={emailStatus === 'loading'}>
+                    {emailStatus === 'loading' ? (
+                      <span>Sending...</span>
+                    ) : emailStatus === 'success' ? (
+                      <>
+                        <span>✓ Submitted!</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Get Early Access</span>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </>
+                    )}
+                  </button>
+                </div>
+                {emailStatus === 'success' && (
+                  <p className="form-message success-message">🎉 Thank you! We'll be in touch soon.</p>
+                )}
+                {emailStatus === 'error' && (
+                  <p className="form-message error-message">⚠️ Something went wrong. Please try again.</p>
+                )}
+              </form>
             </div>
             <div className="hero-content-right">
               <img src="/Union.png" alt="Healthcare" className="hero-right-image" />
@@ -201,6 +254,88 @@ function App() {
             </div>
           </section>
 
+          {/* About Us Section */}
+          <section className="about-us-section animate-on-scroll">
+            <div className="about-us-container">
+              <div className="about-header">
+                <div className="section-badge about-badge">
+                  <span className="badge-emoji">👨‍⚕️</span>
+                  <span>About Us</span>
+                </div>
+                <h2 className="section-title about-title">
+                  Empowering You to Take <span className="accent-text">Charge</span> of Your Health
+                </h2>
+              </div>
+
+              <div className="about-grid">
+                <div className="about-card">
+                  <h3 className="card-title">Our Mission</h3>
+                  <p className="card-text">
+                    We created this platform as physicians and healthcare providers who believe that everyone deserves clear, confident, 
+                    and accessible guidance in navigating their health. Our mission is to empower individuals to take charge of their 
+                    well-being by offering tools, insights, and support grounded in real clinical experience.
+                  </p>
+                </div>
+
+                <div className="about-card">
+                  <h3 className="card-title">Patient-Centric Design</h3>
+                  <p className="card-text">
+                    Designed with the patient's perspective in mind, our site and mobile application simplify complex medical 
+                    decisions, bridge communication gaps, and help users feel more informed and in control of their healthcare journey.
+                  </p>
+                </div>
+
+                <div className="about-card">
+                  <h3 className="card-title">Our Goal</h3>
+                  <p className="card-text">
+                    Our goal is to give you the tools to take charge of your health and make it as seamless as possible, 
+                    empowering you every step of the way.
+                  </p>
+                </div>
+              </div>
+
+              <div className="founder-section">
+                <div className="founder-content">
+                  <div className="founder-badge">
+                    <span className="badge-dot-pulse"></span>
+                    <span>The Story Behind Care</span>
+                  </div>
+                  <h3 className="founder-title">From Physician to Patient — A Journey of Understanding</h3>
+                  
+                  <div className="story-content">
+                    <div className="story-quote-box">
+                      <p className="quote-text">
+                        Dr. Vishal Raizada, like many physicians—and really, like most people—did not fully grasp the depth of the patient 
+                        experience until he became a chronically ill patient himself.
+                      </p>
+                    </div>
+
+                    <div className="story-paragraphs">
+                      <p className="story-paragraph">
+                        What began as a normal day quickly spiraled into what felt like a tornado of symptoms, shifting him from feeling well 
+                        to living with constant pain. As he struggled to navigate his own health journey, he saw firsthand just how overwhelming 
+                        and disheartening the modern U.S. healthcare system can be.
+                      </p>
+                      
+                      <p className="story-paragraph">
+                        What struck him most was realizing that he had medical knowledge and insider understanding to advocate for 
+                        himself—yet even with those advantages, the process was exhausting. He couldn't stop thinking about the countless 
+                        people without that background who must feel lost, unheard, and powerless.
+                      </p>
+                      
+                      <div className="story-highlight-box">
+                        <p className="highlight-text">
+                          This platform is his effort to give that power back—to provide clarity, support, and guidance to anyone seeking help, 
+                          so no one has to navigate their health alone.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Services Section */}
           <section className="services-section animate-on-scroll">
             <div className="services-container">
@@ -262,14 +397,6 @@ function App() {
                     <p className="insurance-description">
                       Understand your coverage, benefits, and claims instantly — no confusion, just clear answers.
                     </p>
-                    <button className="btn-download-insurance">
-                      <span>Download App</span>
-                      <div className="btn-icon-circle">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                      </div>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -294,14 +421,16 @@ function App() {
                     <div className="feature-header">
                       <div className="feature-icon-box">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="9" cy="7" r="4"></circle>
+                          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
                       </div>
-                      <h4 className="feature-title">Smart Patient Records</h4>
+                      <h4 className="feature-title">Insurance-Based Specialist Referrals</h4>
                     </div>
                     <p className="feature-text">
-                      Centralize all patient data — lab results, prescriptions, notes, and history — in one HIPAA-secure dashboard powered by AI tagging and quick search.
+                      Seamlessly refer patients to in-network specialists based on their insurance coverage, ensuring optimal care coordination and cost-effectiveness.
                     </p>
                   </div>
 
@@ -340,13 +469,14 @@ function App() {
                     <div className="feature-header">
                       <div className="feature-icon-box">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                          <path d="M9 11l3 3L22 4"></path>
+                          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                         </svg>
                       </div>
-                      <h4 className="feature-title">Unified Communication Hub</h4>
+                      <h4 className="feature-title">Referral Plan Updates</h4>
                     </div>
                     <p className="feature-text">
-                      Chat or video-call patients, share reports securely, and track all interactions inside a single, compliant workspace.
+                      Track and update referral plans in real-time, monitor specialist appointments, and maintain comprehensive care coordination across providers.
                     </p>
                   </div>
                 </div>
@@ -445,14 +575,6 @@ function App() {
                 <p className="cta-description">
                   We provide reliable healthcare services, expert guidance, and digital solutions designed to support your wellness journey.
                 </p>
-                <button className="btn-cta-explore">
-                  <span>Explore App</span>
-                  <div className="btn-icon-circle">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                  </div>
-                </button>
               </div>
             </div>
           </section>
